@@ -52,7 +52,7 @@ sentence_list = [
     "얌전한 고양이 부뚜막에 먼저 올라간다."
 ]
 
-secret_file = os.path.join('secrets.json')
+secret_file = os.path.join('../secrets.json')
 
 with open(secret_file) as f:
     secrets = json.loads(f.read())
