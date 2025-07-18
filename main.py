@@ -9,6 +9,7 @@ import os
 import json
 import discord
 import time
+import aiohttp
 from discord.ext import commands
 from discord.ui import Button, View
 from discord import app_commands, Interaction
@@ -195,6 +196,55 @@ class CalculatorView(discord.ui.View):
             self.expression = "Error"
         await self.update_message(interaction)
 
+class NoticePager(discord.ui.View):
+    def __init__(self, user: discord.User, notices: list):
+        super().__init__(timeout=120)
+        self.user = user
+        self.notices = notices
+        self.index = 0
+
+    def create_embed(self):
+        notice = self.notices[self.index]
+        embed = discord.Embed(title=notice.get('title', '공지'), color=0x00aaff)
+        content = f"{notice.get('content0', '')}\n\n{notice.get('content1', '')}"
+        if len(content) > 1024:
+            content = content[:1021] + "..."
+        embed.add_field(name="내용", value=content, inline=False)
+        embed.set_footer(text=f"{self.index + 1} / {len(self.notices)}")
+        return embed
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.user.id:
+            await interaction.response.send_message("이 버튼은 당신만 사용할 수 있습니다.", ephemeral=True)
+            return False
+        return True
+
+    @discord.ui.button(label="이전", style=discord.ButtonStyle.secondary)
+    async def previous(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.index > 0:
+            self.index -= 1
+            embed = self.create_embed()
+            await interaction.response.edit_message(embed=embed, view=self)
+        else:
+            await interaction.response.send_message("첫 공지입니다.", ephemeral=True)
+
+    @discord.ui.button(label="다음", style=discord.ButtonStyle.primary)
+    async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.index < len(self.notices) - 1:
+            self.index += 1
+            embed = self.create_embed()
+            await interaction.response.edit_message(embed=embed, view=self)
+        else:
+            await interaction.response.send_message("마지막 공지입니다.", ephemeral=True)
+
+
+async def fetch_notices(url: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            return None
+
 
 client = aclient()
 tree = app_commands.CommandTree(client)
@@ -234,10 +284,48 @@ async def ping(interaction : discord.Interaction):
     print(client.latency)
 
 @tree.command(name="계산기", description="버튼 기반 계산기를 실행합니다.")
-async def calculator(interaction: discord.Interaction):
+async def 계산기(interaction: discord.Interaction):
     view = CalculatorView()
     await interaction.response.send_message("```\n0\n```", view=view)
     
+@tree.command(name="중요공지", description="웹사이트에서 최신 중요공지를 가져옵니다.")
+async def 중요공지(interaction: discord.Interaction):
+    url = "https://www.wltp.world/api/important_notices/"
+    data = await fetch_notices(url)
+    if not data or len(data) == 0:
+        await interaction.response.send_message("❌ 공지사항을 가져오지 못했습니다.", ephemeral=True)
+        return
+
+    view = NoticePager(interaction.user, data)
+    embed = view.create_embed()
+    await interaction.response.send_message("📢 중요 공지 목록입니다.", embed=embed, ephemeral=True, view=view)
+
+
+@tree.command(name="일반공지", description="웹사이트에서 최신 일반공지를 가져옵니다.")
+async def 일반공지(interaction: discord.Interaction):
+    url = "https://www.wltp.world/api/normal_notices/"
+    data = await fetch_notices(url)
+    if not data or len(data) == 0:
+        await interaction.response.send_message("❌ 공지사항을 가져오지 못했습니다.", ephemeral=True)
+        return
+
+    view = NoticePager(interaction.user, data)
+    embed = view.create_embed()
+    await interaction.response.send_message("📢 일반 공지 목록입니다.", embed=embed, ephemeral=True, view=view)
+
+
+@tree.command(name="아카이브공지", description="웹사이트에서 최신 아카이브공지를 가져옵니다.")
+async def 아카이브공지(interaction: discord.Interaction):
+    url = "https://www.wltp.world/api/archived_notices/"
+    data = await fetch_notices(url)
+    if not data or len(data) == 0:
+        await interaction.response.send_message("❌ 공지사항을 가져오지 못했습니다.", ephemeral=True)
+        return
+
+    view = NoticePager(interaction.user, data)
+    embed = view.create_embed()
+    await interaction.response.send_message("📢 아카이브 공지 목록입니다.", embed=embed, ephemeral=True, view=view)
+
 
 
 @tree.command(description='타자 실력을 계산해줍니다.')
@@ -322,16 +410,15 @@ async def 주사위(interaction: discord.Interaction, numrange: int):
 
 
 @tree.command(description='메세지를 지웁니다')
-async def 청소(interaction, number: int):
-    if number != None:
-        await interaction.response.send_message('뉘에뉘어 (왜 나만 시키냐고 도대체ㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔㅔ)')
-        await interaction.channel.purge(limit=int(number) + 2)
-        msg = f'**{number}개**의 메세지를 삭제했습니다.(이 메세지는 3초후에 사라집니다)'
-        await interaction.channel.send(msg)
-        time.sleep(3)
-        await interaction.channel.purge(limit=1)
+async def 청소(interaction: discord.Interaction, number: int):
+    if number is not None and number > 0:
+        await interaction.response.send_message(f'**{number}개**의 메세지를 삭제합니다...', ephemeral=True)
+        deleted = await interaction.channel.purge(limit=number + 2)
+        msg = await interaction.channel.send(f'**{len(deleted)}개**의 메세지를 삭제했습니다.(이 메세지는 3초 후에 사라집니다)')
+        await asyncio.sleep(3)
+        await msg.delete()
     else:
-        await interaction.channel.send('올바른 값을 입력해주세요')
+        await interaction.response.send_message('올바른 값을 입력해주세요.', ephemeral=True)
 
 
 
