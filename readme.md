@@ -1,47 +1,49 @@
-# WltpDiscordBot
+# 🪐 WltpDiscordBot
 
-**WLTP 디스코드 커뮤니티** 전용 기능을 지원하는 다기능 Discord 봇입니다.  
-타자 연습, 마인크래프트 서버 공지 연동, 유저 편의 기능을 제공합니다.
+**WLTP 디스코드 커뮤니티** 전용 다기능 Discord 봇입니다.  
+타자 연습, 서버 공지 연동, 커뮤니티 기능을 지원합니다.
 
----
-
-## 🧠 주요 기능
-
-| 기능 이름    | 설명                        |
-|----------|---------------------------|
-| `타자연습`   | 봇과의 인터랙션을 통해 타자 실력 테스트 가능 |
-| `주사위`    | 봇과 원하는 범위로 주사위 대결 가능      |
-| `청소`     | 원하는 만큼 메세지 지우기 가능         |
-| `ping`   | 봇의 처리 시간 계산 가능            |
-| `서버와 연동` | 웹사이트 공지사항 연동              |
+> 🌍 [English version available below](#-wltpdiscordbot-en)
 
 ---
 
-## 🧑‍💻 개발 환경
+## 🧠 주요 기능 (Features)
 
-| 항목 | 사용 기술                                    |
-|------|------------------------------------------|
-| 언어 | Python 3.10+                             |
-| 라이브러리 | `discord.py`, `aiohttp`, `python-dotenv` |
-| 패키징 | `venv`, `requirements.txt`               |
-| 테스트 서버 | 지세 커뮤니티                                  |
-| 운영체제 | Ubuntu 24.04                             |
-| 배포 방식 | python main.py                           |
+| 기능 이름         | 설명                                         |
+|------------------|--------------------------------------------|
+| `타자연습`        | 봇과의 인터랙션을 통해 타자 실력 테스트 가능                  |
+| `주사위`          | 사용자 간 주사위 대결 가능                                 |
+| `청소`           | 명령어를 통해 지정한 개수만큼 메시지 삭제 가능                     |
+| `핑` (`ping`)     | 봇의 반응 속도 측정                                   |
+| `공지 연동`        | 웹사이트 공지사항 API와 실시간 연동                           |
 
+---
 
+## 🧑‍💻 개발 환경 (Dev Environment)
 
-## 🌐 API 출처
+| 항목         | 내용                                                                 |
+|--------------|----------------------------------------------------------------------|
+| 언어         | Python 3.10+                                                         |
+| 라이브러리   | `discord.py`, `aiohttp`, `python-dotenv`                             |
+| 패키징       | `venv`, `requirements.txt`                                           |
+| 서버 환경    | Ubuntu 24.04                                                         |
+| 배포 방식    | `python main.py` 직접 실행                                             |
 
-- `https://www.wltp.world/api/important_notices/`
-- `https://www.wltp.world/api/normal_notices/`
-- `https://www.wltp.world/api/archived_notices/`
+---
 
-JSON 형식의 공지 데이터를 받아와 표시합니다.
+## 🌐 API 출처 (API Sources)
 
+- [`/api/important_notices/`](https://www.wltp.world/api/important_notices/)
+- [`/api/normal_notices/`](https://www.wltp.world/api/normal_notices/)
+- [`/api/archived_notices/`](https://www.wltp.world/api/archived_notices/)
 
-## ⚙️ 설치 및 실행
+> JSON 형식의 공지 데이터를 디스코드에 출력합니다.
 
-### 1. 환경 설정
+---
+
+## ⚙️ 설치 및 실행 (Install & Run)
+
+### 1. 저장소 클론 및 환경 설정
 
 ```bash
 git clone https://github.com/yourusername/WltpDiscordBot.git
