@@ -206,10 +206,12 @@ class NoticePager(discord.ui.View):
     def create_embed(self):
         notice = self.notices[self.index]
         embed = discord.Embed(title=notice.get('title', '공지'), color=0x00aaff)
-        content = f"{notice.get('content0', '')}\n\n{notice.get('content1', '')}"
+        content0 = f"{notice.get('content0', '')}"
+        content1 = f"{notice.get('content1', '')}"
         if len(content) > 1024:
             content = content[:1021] + "..."
-        embed.add_field(name="내용", value=content, inline=False)
+        embed.add_field(name="내용", value=content0, inline=False)
+        embed.add_field(name=" ", value=content1, inline=False)
         embed.set_footer(text=f"{self.index + 1} / {len(self.notices)}")
         return embed
 
@@ -253,10 +255,15 @@ tree = app_commands.CommandTree(client)
 @tree.command(description='도움말을 띄웁니다.')
 async def 도움말(interaction : discord.Interaction):
     embed = discord.Embed(title="도움말", color=0x66FFFF)
-    embed.add_field(name='도움말', value='현제 이 창을 띄웁니다.', inline=False)
-    embed.add_field(name='타자연습', value='타자 실력을 계산해줍니다.', inline=False)
-    embed.add_field(name='청소', value='메세지를 지웁니다.', inline=False)
-    embed.add_field(name='ping', value='봇의 처리 지연시간을 알려줍니다.', inline=False)
+    embed.add_field(name='/도움말', value='현제 이 창을 띄웁니다.', inline=False)
+    embed.add_field(name='/타자연습', value='타자 실력을 계산해줍니다.', inline=False)
+    embed.add_field(name='/청소', value='메세지를 지웁니다.', inline=False)
+    embed.add_field(name='/계산기', value='버튼으로 만든 계산기를 띄웁니다.', inline=False)
+    embed.add_field(name='/중요공지', value='웹사이트의 중요 공지를 가져옵니다.', inline=False)
+    embed.add_field(name='/일반공지', value='웹사이트의 일반 공지를 가져옵니다.', inline=False)
+    embed.add_field(name='/아카이브공지', value='웹사이트의 아카이브 공지를 가져옵니다.', inline=False)
+    embed.add_field(name='/팩트', value='이 서버의 모든 팩트를 알려줍니다.', inline=False)
+    embed.add_field(name='/ping', value='봇의 처리 지연시간을 알려줍니다.', inline=False)
     await interaction.response.send_message(embed=embed)
 
 @tree.command(description='봇의 처리 지연시간을 알려줍니다.')
@@ -280,13 +287,19 @@ async def ping(interaction : discord.Interaction):
     if client.latency>5001 and client.latency<100000:
         embed = discord.Embed(title="💀 Pong????????????????(wtf???????)", color=0x000000)
         embed.add_field(name=' ', value=':ping_pong: Pong! {0}ms'.format(round(client.latency, 1)), inline=False)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=False)
     print(client.latency)
 
 @tree.command(name="계산기", description="버튼 기반 계산기를 실행합니다.")
 async def 계산기(interaction: discord.Interaction):
     view = CalculatorView()
     await interaction.response.send_message("```\n0\n```", view=view)
+
+@tree.command(name="팩트", description="이 서버의 모든 팩트를 알려줍니다.")
+async def 팩트(interaction: discord.Interaction):
+    embed = discord.Embed(title="팩트", color=0x66FFFF)
+    embed.add_field(name='1.DICEDICEFACE1은 멍청하다', value='공부할 생각도 없음.', inline=False)
+
     
 @tree.command(name="중요공지", description="웹사이트에서 최신 중요공지를 가져옵니다.")
 async def 중요공지(interaction: discord.Interaction):
