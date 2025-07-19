@@ -299,13 +299,14 @@ async def 계산기(interaction: discord.Interaction):
 async def 팩트(interaction: discord.Interaction):
     embed = discord.Embed(title="팩트", color=0x66FFFF)
     embed.add_field(name='1.DICEDICEFACE1은 멍청하다', value='공부할 생각도 없음.', inline=False)
+    await interaction.response.send_message(embed=embed, ephemeral=False)
 
     
 @tree.command(name="중요공지", description="웹사이트에서 최신 중요공지를 가져옵니다.")
 async def 중요공지(interaction: discord.Interaction):
     url = "https://www.wltp.world/api/important_notices/"
     data = await fetch_notices(url)
-    if not data or len(data) == 0:
+    if not data or len(data) == 0:  
         await interaction.response.send_message("❌ 공지사항을 가져오지 못했습니다.", ephemeral=True)
         return
 
