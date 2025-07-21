@@ -208,8 +208,10 @@ class NoticePager(discord.ui.View):
         embed = discord.Embed(title=notice.get('title', '공지'), color=0x00aaff)
         content0 = f"{notice.get('content0', '')}"
         content1 = f"{notice.get('content1', '')}"
-        if len(content) > 1024:
-            content = content[:1021] + "..."
+        if len(content0) > 1024:
+            content0 = content0[:1021] + "..."
+        if len(content1) > 1024:
+            content1 = content1[:1021] + "..."
         embed.add_field(name="내용", value=content0, inline=False)
         embed.add_field(name=" ", value=content1, inline=False)
         embed.set_footer(text=f"{self.index + 1} / {len(self.notices)}")
